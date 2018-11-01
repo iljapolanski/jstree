@@ -20,7 +20,8 @@ function Tree(){
             if (xhr.readyState != 4) return;
 
             if(self.type === self.TYPE_XML){
-                self.drawFromXML(xhr.responseXML);
+                var jsonNodes = self.getDataFromXML(xhr.responseXML);
+                self.drawFromJSON(jsonNodes);
             }else if(self.type === self.TYPE_JSON){
                 var jsonNodes = eval(xhr.responseText);
                 self.drawFromJSON(jsonNodes);
@@ -100,11 +101,8 @@ function Tree(){
             switchButton.className = this.CLASS_NOCHILDREN;
         }
     };
-    this.drawFromXML = function(xml){
-        var container = document.getElementById(this.elementId);
-        container.className = 'tree';
-        var ul = document.createElement('UL');
-        ul = container.appendChild(ul);
+    this.getDataFromXML = function(xml){
+        var jsonNodes = [];
         var nodes = xml.documentElement.children;
         var i=0;
         var count = nodes.length;
@@ -112,58 +110,30 @@ function Tree(){
         for(i=0; i<count; i++){
             node = nodes[i];
             if(node.tagName !== 'node'){continue;}
-            this.drawSingleNodeFromXML(node, ul);
+            jsonNodes.push(this.getDataNodeFromXML(node));
         }
+        return jsonNodes;
     };
-    this.drawSingleNodeFromXML = function(node, container){
-        var title = node.getElementsByTagName('title')[0].childNodes[0].nodeValue;
-        var li = document.createElement('LI');
-
-        var switchButton = document.createElement('SPAN');
-
-        var titleElem = document.createElement('A');
+    this.getDataNodeFromXML = function(node){
+        var dataElem = {};
+        dataElem.title = node.getElementsByTagName('title')[0].childNodes[0].nodeValue;
         if(node.getElementsByTagName('href').length){
-            titleElem.href = node.getElementsByTagName('href')[0].childNodes[0].nodeValue;
+            dataElem.href = node.getElementsByTagName('href')[0].childNodes[0].nodeValue;
         }else {
-            titleElem.href = 'javascript: void(0);';
+            dataElem.href = 'javascript: void(0);';
         }
-        titleElem.innerHTML = title;
-        titleElem.className = 'title';
-
-        switchButton = li.appendChild(switchButton);
-        li.appendChild(titleElem);
-
-        li = container.appendChild(li);
-
         var children = node.getElementsByTagName('children');
         if(children.length){
-            var ul = document.createElement('UL');
-            ul = li.appendChild(ul);
-
             if(node.getElementsByTagName('opened').length){
                 if(node.getElementsByTagName('opened')[0].childNodes[0].nodeValue == 'true'){
-                    switchButton.className = this.CLASS_OPEN;
-                    ul.style.display = 'block';
+                    dataElem.opened = true;
                 }else{
-                    switchButton.className = this.CLASS_CLOSED;
-                    ul.style.display = 'none';
+                    dataElem.opened = false;
                 }
             }else{
-                switchButton.className = this.CLASS_OPEN;
-                ul.style.display = 'block';
+                dataElem.opened = false;
             }
-
-            var self = this;
-            switchButton.onclick = function(){
-                if(switchButton.className === self.CLASS_CLOSED){
-                    switchButton.className = self.CLASS_OPEN;
-                    ul.style.display = 'block';
-                }else if(switchButton.className === self.CLASS_OPEN){
-                    switchButton.className = self.CLASS_CLOSED;
-                    ul.style.display = 'none';
-                }
-
-            };
+            dataElem.children = [];
             var nodes = node.getElementsByTagName('children')[0].children;
             var i=0;
             var count = nodes.length;
@@ -173,10 +143,9 @@ function Tree(){
                 if(node.tagName !== 'node'){
                     continue;
                 }
-                this.drawSingleNodeFromXML(node, ul);
+                dataElem.children.push(this.getDataNodeFromXML(node));
             }
-        }else{
-            switchButton.className = this.CLASS_NOCHILDREN;
         }
+        return dataElem;
     };
 }

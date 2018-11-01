@@ -1,5 +1,5 @@
 .tree{
-
+    margin-top: 10px;
 }
 
 .tree ul li div{
@@ -17,28 +17,23 @@
 
 .tree .title{
     border: 0px solid #ddd;
-    background-color: #f9ecec;
+    background-color: inherit;
     margin: auto;
+    font-family: Arial;
+    font-size: 14px;
+    padding-left: 10px;
+    padding-right: 20px;
+    padding-bottom: 1px;
+    padding-top: 2px;
+    text-decoration: none;
+    color: black;
+}
+.tree .title:hover{
+    color: darkgreen;
 }
 
-.tree .switch-with-children-closed{
-    display: inline-block;
-    border: 0px solid #ddd;
-    height: 1em;
-    width: 1em;
-    font-size: 16px;
-    background-color: #ffffff;
-    margin: auto;
-}
-.tree .switch-with-children-open{
-    display: inline-block;
-    border: 0px solid #ddd;
-    height: 1em;
-    width: 1em;
-    font-size: 16px;
-    background-color: #ffffff;
-    margin: auto;
-}
+.tree .switch-with-children-closed,
+.tree .switch-with-children-open,
 .tree .switch-no-children{
     display: inline-block;
     border: 0px solid #ddd;
@@ -47,4 +42,27 @@
     font-size: 16px;
     background-color: #ffffff;
     margin: auto;
+}
+
+.context-menu-container{
+    display: none;
+    position: fixed;
+    background-color: white;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    padding: 20px;
+}
+
+.context-menu-container ul{
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+.context-menu-container li{
+    border-bottom: 1px solid #ddd;
+    margin-top: 12px;
+    cursor: pointer;
+}
+.context-menu-container li:first-of-type{
+    margin-top: 0px;
 }
