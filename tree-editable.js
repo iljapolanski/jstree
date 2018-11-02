@@ -5,6 +5,7 @@ function TreeEditable(){
     this.src = '';
     this.elementId = '';
     this.type = this.TYPE_JSON;
+    this.accessToken = '';
 
     this.CLASS_OPEN = 'switch-with-children-open far fa-arrow-alt-circle-down';
     this.CLASS_CLOSED = 'switch-with-children-closed far fa-arrow-alt-circle-right';
@@ -19,11 +20,11 @@ function TreeEditable(){
         xhr.onreadystatechange = function() {
             if (xhr.readyState != 4) return;
 
-            var jsonNodes = eval(xhr.responseText);
-            self.drawFromJSON(jsonNodes);
+            var jsonNodes = JSON.parse(xhr.responseText);
+            self.drawFromJSON(jsonNodes.entities);
         };
-        xhr.open('GET', this.src, true);
-        xhr.setRequestHeader('Authorization', 'Bearer AccessToken_For_Admin');
+        xhr.open('GET', this.src + '?expand=children&parentId=0', true);
+        xhr.setRequestHeader('Authorization', this.accessToken);
         xhr.send();
     };
     this.drawFromJSON = function(json){
@@ -44,7 +45,7 @@ function TreeEditable(){
         var title = node.title;
         var li = document.createElement('LI');
         li.setAttribute('data-id', node.id);
-        li.setAttribute('data-parentId', node.parentId);
+        li.setAttribute('data-parentid', node.parentId);
         li.setAttribute('data-position', node.position);
 
         var switchButton = document.createElement('SPAN');
@@ -83,13 +84,18 @@ function TreeEditable(){
                 contextMenuContainer = document.body.appendChild(contextMenuContainer);
             }
             self.updateContextMenu(evt, container, li, contextMenuContainer, self, titleElem);
+            document.onclick = function(){
+                contextMenuContainer.style.display = 'none';
+            };
         };
 
         var nodes = null;
+        var childrenCount = 0;
         try{
             nodes = node.children;
+            childrenCount = nodes.length;
         }catch(e){}
-        if(nodes){
+        if(childrenCount){
             var ul = document.createElement('UL');
             ul = li.appendChild(ul);
 
@@ -132,7 +138,7 @@ function TreeEditable(){
         liAppend = ulCM.appendChild(liAppend);
         liAppend.onclick = function(){
             contextMenuContainer.style.display = 'none';
-            var node = {title: 'new node', href: 'javascript: void(0);', parentId: li.getAttribute('data-id')};
+            var node = {title: 'new node', href: 'javascript: void(0);', parents: parseInt(li.getAttribute('data-id'))};
             var childElemsContainer = null;
             var lastChildPosition = 0;
             try{
@@ -154,7 +160,9 @@ function TreeEditable(){
                     }
                 };
             }else{
-                lastChildPosition = parseInt(childElemsContainer.lastChild.getAttribute('data-position'));
+                try {
+                    lastChildPosition = parseInt(childElemsContainer.lastChild.getAttribute('data-position'));
+                }catch(e){}
             }
             node.position = lastChildPosition+1;
 
@@ -166,8 +174,9 @@ function TreeEditable(){
                 newLi.setAttribute('data-id', newNode.id);
             };
             xhr.open('POST', self.src);
-            xhr.setRequestHeader('Authorization', 'Bearer AccessToken_For_Admin');
+            xhr.setRequestHeader('Authorization', self.accessToken);
             xhr.setRequestHeader('Content-Type', 'application/json');
+
             xhr.send(JSON.stringify(node));
         };
 
@@ -190,7 +199,7 @@ function TreeEditable(){
                 container.removeChild(li);
             };
             xhr.open('DELETE', self.src + '/' + li.getAttribute('data-id') );
-            xhr.setRequestHeader('Authorization', 'Bearer AccessToken_For_Admin');
+            xhr.setRequestHeader('Authorization', self.accessToken);
             xhr.send(null);
         };
 
@@ -214,16 +223,19 @@ function TreeEditable(){
         modalContainer.id = 'modal-edit-container';
         modalContainer = document.body.appendChild(modalContainer);
 
-        var modalCloseBtn = document.createElement('DIV');
-        modalCloseBtn.className = 'modal-close-btn';
-        modalCloseBtn.id = 'modal-close-btn';
-        modalCloseBtn.innerHTML = 'X';
+        var modalCloseBtnContainer = document.createElement('DIV');
+        modalCloseBtnContainer.className = 'modal-close-btn';
+        modalCloseBtnContainer.id = 'modal-close-btn';
+        var modalCloseBtn = document.createElement('SPAN');
+        modalCloseBtn.innerHTML = '&times;';
         modalCloseBtn.onclick = function(){
             modalBackground.style.display = 'none';
             modalContainer.style.display = 'none';
             document.body.style.overflow = 'visible';
         };
-        modalCloseBtn = modalContainer.appendChild(modalCloseBtn);
+        modalCloseBtnContainer = modalContainer.appendChild(modalCloseBtnContainer);
+        modalCloseBtn = modalCloseBtnContainer.appendChild(modalCloseBtn);
+
 
         var modalContent = document.createElement('DIV');
         modalContent.className = 'modal-edit-content';
@@ -247,7 +259,7 @@ function TreeEditable(){
 
         modalBackground = document.getElementById('modal-background');
         modalContainer = document.getElementById('modal-edit-container');
-        modalCloseBtn = document.getElementById('modal-close-btn');
+        modalCloseBtn = document.getElementById('modal-close-btn').getElementsByTagName('SPAN')[0];
         modalBackground.style.display = 'block';
         modalContainer.style.display = 'block';
         document.body.style.overflow = 'hidden';
@@ -267,7 +279,7 @@ function TreeEditable(){
             var node = {
             'title': title,
             'href': href,
-            'parentId': li.getAttribute('data-parentId'),
+            'parents': li.getAttribute('data-parentid'),
             'position': li.getAttribute('data-position')
             };
             xhr.onreadystatechange = function() {
@@ -277,7 +289,7 @@ function TreeEditable(){
                 titleElem.href = href;
             };
             xhr.open('PATCH', self.src + '/' + li.getAttribute('data-id'));
-            xhr.setRequestHeader('Authorization', 'Bearer AccessToken_For_Admin');
+            xhr.setRequestHeader('Authorization', self.accessToken);
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.send(JSON.stringify(node));
         };

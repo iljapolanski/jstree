@@ -13,9 +13,9 @@ function testAPI(){
         //var entities = JSON.parse(xhr.responseText);
         console.log(xhr.responseText);
     };
-    xhr.open('PATCH', 'http://increase.loc/api/hierarchy/5', true);
+    xhr.open('GET', 'http://increase.loc/api/hierarchy?expand=children', true);
     xhr.setRequestHeader('Authorization', 'Bearer AccessToken_For_Admin');
     xhr.setRequestHeader('Content-Type', 'application/json');
 
-    xhr.send(JSON.stringify(node));
+    xhr.send(null);
 }

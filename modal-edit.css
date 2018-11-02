@@ -18,7 +18,18 @@
     background-color: white;
     border: 1px solid black;
     border-radius: 10px;
+    box-shadow: 10px 10px 5px grey;
 }
+.modal-edit-container .modal-close-btn{
+    text-align: right;
+}
+.modal-edit-container .modal-close-btn span{
+    cursor: pointer;
+    padding: 10px;
+    font-size: 24px;
+    color: red;
+}
+
 .modal-edit-content div{
     display: flex;
     flex-direction: row;
