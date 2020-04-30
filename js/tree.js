@@ -125,29 +125,33 @@ class Tree
         }else {
             dataElem.href = 'javascript: void(0);';
         }
+        
         let children = node.getElementsByTagName('children');
-        if(children.length){
-            if(node.getElementsByTagName('opened').length){
-                if(node.getElementsByTagName('opened')[0].childNodes[0].nodeValue == 'true'){
-                    dataElem.opened = true;
-                }else{
-                    dataElem.opened = false;
-                }
+        if(!children.length){
+            return dataElem;
+        }
+
+        if(node.getElementsByTagName('opened').length){
+            if(node.getElementsByTagName('opened')[0].childNodes[0].nodeValue == 'true'){
+                dataElem.opened = true;
             }else{
                 dataElem.opened = false;
             }
-            dataElem.children = [];
-            let nodes = node.getElementsByTagName('children')[0].children;
-            const count = nodes.length;
-            let childNode = null;
-            for(let i=0; i<count; i++){
-                childNode = nodes[i];
-                if(childNode.tagName !== 'node'){
-                    continue;
-                }
-                dataElem.children.push(this.getDataNodeFromXML(childNode));
-            }
+        }else{
+            dataElem.opened = false;
         }
+        dataElem.children = [];
+        let nodes = node.getElementsByTagName('children')[0].children;
+        const count = nodes.length;
+        let childNode = null;
+        for(let i=0; i<count; i++){
+            childNode = nodes[i];
+            if(childNode.tagName !== 'node'){
+                continue;
+            }
+            dataElem.children.push(this.getDataNodeFromXML(childNode));
+        }
+
         return dataElem;
     }
 }
